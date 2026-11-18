@@ -1,0 +1,10 @@
+PREFIX edso: <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl#>
+PREFIX dct: <http://purl.org/dc/terms/>
+
+SELECT ?round ?population ?unit ?adjacency ?accountant ?epsilon ?delta ?limit
+       (IF(!BOUND(?limit), "no ceiling recorded", IF(?epsilon <= ?limit, "within stated ceiling", "above stated ceiling")) AS ?status) WHERE {
+  ?round edso:privacyAccount ?a .
+  ?a edso:accountScope ?round ; dct:subject ?population ; edso:protectedUnit ?unit ;
+     edso:adjacency ?adjacency ; edso:accountant ?accountant ; edso:epsilon ?epsilon ; edso:delta ?delta .
+  OPTIONAL { ?a edso:epsilonLimit ?limit }
+}

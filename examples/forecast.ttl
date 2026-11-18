@@ -1,0 +1,96 @@
+@prefix edso: <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl#> .
+@prefix ex: <https://example.org/edso/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix dqv: <http://www.w3.org/ns/dqv#> .
+@prefix unit: <http://qudt.org/vocab/unit/> .
+@prefix attr: <http://purl.org/linked-data/sdmx/2009/attribute#> .
+@prefix eds: <https://w3id.org/omega-x/ontology/EnergyDataSet/> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+# All entities, scores and decisions are fictional. Two operators train locally.
+ex:operatorA a prov:Organization, prov:Agent .
+ex:operatorB a prov:Organization, prov:Agent .
+ex:trainer a prov:SoftwareAgent, prov:Agent .
+ex:lab a prov:Organization, prov:Agent .
+ex:siteA a prov:Location . ex:siteB a prov:Location .
+ex:gymSite a prov:Location . ex:tefSite a prov:Location .
+ex:serviceA a dcat:DataService ; dcat:servesDataset ex:loadA ;
+    dct:publisher ex:operatorA ; dcat:endpointURL <https://example.org/catalog/a> .
+ex:catalog a dcat:Catalog ; dcat:dataset ex:loadA, ex:loadB, ex:synthetic ;
+    dcat:service ex:serviceA .
+ex:loadA a dcat:Dataset, eds:EnergyDataSet ; dcat:version "A-03" ;
+    dct:title "Feeder demand, site A"@en ; dct:publisher ex:operatorA ;
+    dcat:temporalResolution "PT15M"^^xsd:duration ;
+    dct:conformsTo ex:feederProfileV1 ; odrl:hasPolicy ex:policyA .
+ex:loadB a dcat:Dataset ; dcat:version "B-07" ; dct:publisher ex:operatorB ;
+    dct:conformsTo ex:feederProfileV1 ; odrl:hasPolicy ex:policyB .
+ex:feederProfileV1 a dct:Standard ; dct:title "Illustrative 15-minute aggregate feeder-demand profile, version 1"@en .
+
+ex:policyA a odrl:Agreement, odrl:Policy ; dct:identifier "A-2026-v1" ;
+    odrl:permission [ odrl:target ex:loadA ; odrl:action edso:localTraining ;
+        odrl:assigner ex:operatorA ; odrl:assignee ex:trainer ] .
+ex:policyB a odrl:Agreement, odrl:Policy ; dct:identifier "B-2026-v3" ;
+    odrl:permission [ odrl:target ex:loadB ; odrl:action edso:localTraining ;
+        odrl:assigner ex:operatorB ; odrl:assignee ex:trainer ] .
+ex:allowA a edso:UseDecision ; edso:policyVersion ex:policyA ;
+    dct:subject ex:loadA ; edso:requestedAction edso:localTraining ; edso:requestedBy ex:trainer ;
+    edso:decisionOutcome edso:Permit ; prov:wasAttributedTo ex:operatorA ;
+    prov:generatedAtTime "2026-01-10T09:00:00Z"^^xsd:dateTime .
+ex:allowB a edso:UseDecision ; edso:policyVersion ex:policyB ;
+    dct:subject ex:loadB ; edso:requestedAction edso:localTraining ; edso:requestedBy ex:trainer ;
+    edso:decisionOutcome edso:Permit ; prov:wasAttributedTo ex:operatorB ;
+    prov:generatedAtTime "2026-01-10T09:00:00Z"^^xsd:dateTime .
+ex:jobA a edso:LocalContribution ; edso:inputSnapshot ex:loadA ;
+    edso:atSite ex:siteA ; prov:startedAtTime "2026-01-10T10:00:00Z"^^xsd:dateTime ; edso:decisionRecord ex:allowA ; prov:wasAssociatedWith ex:trainer .
+ex:jobB a edso:LocalContribution ; edso:inputSnapshot ex:loadB ;
+    edso:atSite ex:siteB ; prov:startedAtTime "2026-01-10T10:00:00Z"^^xsd:dateTime ; edso:decisionRecord ex:allowB ; prov:wasAssociatedWith ex:trainer .
+ex:updateA a prov:Entity ; prov:wasGeneratedBy ex:jobA .
+ex:updateB a prov:Entity ; prov:wasGeneratedBy ex:jobB .
+ex:round1 a edso:FederatedTrainingRound ; edso:update ex:updateA, ex:updateB ;
+    edso:privacyAccount ex:account1 .
+ex:account1 a edso:PrivacyAccount ; edso:accountScope ex:round1 ;
+    dct:subject ex:cohortAB ; edso:protectedUnit "one household over the training period" ;
+    edso:adjacency "add or remove all records of one household" ;
+    edso:accountant "Illustrative RDP accountant v1, converted to an epsilon/delta bound" ;
+    edso:epsilon 1.2 ; edso:delta 0.000001 ; edso:epsilonLimit 2.0 ;
+    dct:source ex:accountantReport .
+ex:checkpoint1 a prov:Entity ; prov:wasGeneratedBy ex:round1 .
+ex:forecastV1 a edso:FoundationModelRelease ; dcat:version "1.0-demo" ;
+    dct:type ex:Forecasting ; prov:wasDerivedFrom ex:checkpoint1 ;
+    dct:references ex:modelCard ; dct:license <https://spdx.org/licenses/MIT.html> .
+# The synthetic holdout is derived from a separate historical sample.
+ex:historicalHoldout a dcat:Dataset .
+ex:synthetic a edso:SyntheticEnergyDataset, dcat:Dataset ; dcat:version "synthetic-1" ;
+    prov:wasDerivedFrom ex:historicalHoldout ; prov:wasGeneratedBy ex:synthesis ;
+    dct:license <https://creativecommons.org/licenses/by/4.0/> ;
+    dqv:hasQualityMeasurement ex:fidelity .
+ex:synthesis a prov:Activity ; prov:used ex:historicalHoldout .
+ex:fidelity a dqv:QualityMeasurement ; dqv:computedOn ex:synthetic ;
+    dqv:isMeasurementOf ex:meanGap ; dqv:value 0.3 ; attr:unitMeasure unit:KiloW .
+ex:meanGap a dqv:Metric ; rdfs:label "Absolute difference of mean feeder loads (kW)"@en .
+ex:protocol1 a prov:Plan ; dct:identifier "forecast-60m/mae/v1" ;
+    dct:description "Forecast the next hour of feeder demand. Score the four 15-minute steps using pooled mean absolute error in kW."@en .
+ex:scenario1 a prov:Entity ; dct:description "Winter peak, intact feeder topology, no simulated telemetry gaps."@en .
+ex:persistenceV1 a prov:Entity ; dct:description "Predict the last observed load for each forecast step."@en .
+ex:gym a edso:EvaluationRun ; edso:setting edso:Gym ; edso:atSite ex:gymSite ;
+    prov:wasAssociatedWith ex:trainer ; edso:evaluatedRelease ex:forecastV1 ;
+    edso:holdout ex:synthetic ; edso:scenario ex:scenario1 ; edso:protocol ex:protocol1 ;
+    edso:baseline ex:persistenceV1 .
+ex:tef a edso:EvaluationRun ; edso:setting edso:TEF ; edso:atSite ex:tefSite ;
+    prov:wasAssociatedWith ex:lab ; edso:evaluatedRelease ex:forecastV1 ;
+    edso:holdout ex:synthetic ; edso:scenario ex:scenario1 ; edso:protocol ex:protocol1 ;
+    edso:baseline ex:persistenceV1 .
+ex:mae a dqv:Metric ; rdfs:label "Mean absolute error in feeder demand"@en .
+ex:gymScore a edso:EvaluationScore ; prov:wasGeneratedBy ex:gym ;
+    dct:type ex:mae ; rdf:value 4.2 ; attr:unitMeasure unit:KiloW .
+ex:tefScore a edso:EvaluationScore ; prov:wasGeneratedBy ex:tef ;
+    dct:type ex:mae ; rdf:value 4.6 ; attr:unitMeasure unit:KiloW .
+ex:review a edso:EvidenceBundle ; edso:evidenceFor ex:forecastV1 ;
+    dct:subject ex:advisoryUse ; dct:description "Review supporting material for advisory feeder forecasting."@en ;
+    prov:wasAttributedTo ex:lab ; prov:hadMember ex:tefScore, ex:modelCard .
+ex:modelCard a prov:Entity .

@@ -1,0 +1,10 @@
+PREFIX edso: <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX dqv: <http://www.w3.org/ns/dqv#>
+PREFIX attr: <http://purl.org/linked-data/sdmx/2009/attribute#>
+
+SELECT DISTINCT ?data ?source ?metric ?value ?unit WHERE {
+  ?run edso:holdout ?data .
+  ?data a edso:SyntheticEnergyDataset ; prov:wasDerivedFrom ?source ; dqv:hasQualityMeasurement ?m .
+  ?m dqv:computedOn ?data ; dqv:isMeasurementOf ?metric ; dqv:value ?value ; attr:unitMeasure ?unit .
+}

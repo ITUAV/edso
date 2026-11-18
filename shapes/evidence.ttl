@@ -1,0 +1,113 @@
+@prefix edso: <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl#> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix prov: <http://www.w3.org/ns/prov#> .
+@prefix odrl: <http://www.w3.org/ns/odrl/2/> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix dqv: <http://www.w3.org/ns/dqv#> .
+@prefix attr: <http://purl.org/linked-data/sdmx/2009/attribute#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+
+edso:UseDecisionShape a sh:NodeShape ;
+    sh:targetClass edso:UseDecision ;
+    sh:property [ sh:path edso:policyVersion ; sh:minCount 1 ; sh:maxCount 1 ; sh:class odrl:Policy ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path dct:subject ; sh:minCount 1 ; sh:maxCount 1 ; sh:class dcat:Dataset ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:requestedAction ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:requestedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Agent ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:decisionOutcome ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( edso:Permit edso:Deny ) ] ;
+    sh:property [ sh:path prov:wasAttributedTo ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Agent ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path prov:generatedAtTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] .
+
+edso:LocalContributionShape a sh:NodeShape ;
+    sh:targetClass edso:LocalContribution ;
+    sh:property [ sh:path edso:inputSnapshot ; sh:minCount 1 ; sh:maxCount 1 ; sh:class dcat:Dataset ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:atSite ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Location ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:decisionRecord ; sh:minCount 1 ; sh:maxCount 1 ; sh:class edso:UseDecision ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path prov:wasAssociatedWith ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Agent ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path prov:startedAtTime ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:dateTime ] ;
+    sh:sparql [ sh:message "The executed contribution needs a matching prior permit, dataset policy, action, requester and explicit permission."@en ;
+        sh:select """PREFIX edso: <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX odrl: <http://www.w3.org/ns/odrl/2/>
+PREFIX dct: <http://purl.org/dc/terms/>
+SELECT $this WHERE {
+  $this edso:inputSnapshot ?data ; edso:decisionRecord ?decision ;
+      prov:wasAssociatedWith ?agent ; prov:startedAtTime ?start .
+  FILTER NOT EXISTS {
+    ?data odrl:hasPolicy ?policy .
+    ?decision dct:subject ?data ; edso:policyVersion ?policy ;
+        edso:requestedAction edso:localTraining ; edso:requestedBy ?agent ;
+        edso:decisionOutcome edso:Permit ; prov:generatedAtTime ?when .
+    ?policy odrl:permission ?permission .
+    ?permission odrl:target ?data ; odrl:action edso:localTraining ; odrl:assignee ?agent .
+    FILTER (?when <= ?start)
+  }
+}""" ] .
+
+edso:FederatedTrainingRoundShape a sh:NodeShape ;
+    sh:targetClass edso:FederatedTrainingRound ;
+    sh:property [ sh:path edso:update ; sh:minCount 1 ; sh:nodeKind sh:IRI ; sh:node [ sh:property [ sh:path prov:wasGeneratedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class edso:LocalContribution ] ] ] ;
+    sh:property [ sh:path edso:privacyAccount ; sh:class edso:PrivacyAccount ; sh:nodeKind sh:IRI ] ;
+    sh:sparql [ sh:message "A privacy statement attached to a round must cover that round."@en ;
+        sh:select """PREFIX edso: <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl#>
+SELECT $this WHERE {
+  $this edso:privacyAccount ?report .
+  FILTER NOT EXISTS { ?report edso:accountScope $this }
+}""" ] .
+
+edso:PrivacyAccountShape a sh:NodeShape ;
+    sh:targetClass edso:PrivacyAccount ;
+    sh:property [ sh:path edso:accountScope ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Activity ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path dct:subject ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:protectedUnit ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+    sh:property [ sh:path edso:adjacency ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+    sh:property [ sh:path edso:accountant ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+    sh:property [ sh:path dct:source ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:epsilon ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] ;
+    sh:property [ sh:path edso:delta ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ; sh:maxExclusive 1 ] ;
+    sh:property [ sh:path edso:epsilonLimit ; sh:maxCount 1 ; sh:datatype xsd:decimal ; sh:minInclusive 0 ] .
+
+edso:FoundationModelReleaseShape a sh:NodeShape ;
+    sh:targetClass edso:FoundationModelRelease ;
+    sh:property [ sh:path dcat:version ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:string ] ;
+    sh:property [ sh:path dct:license ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path prov:wasDerivedFrom ; sh:minCount 1 ; sh:nodeKind sh:IRI ] .
+
+edso:SyntheticEnergyDatasetShape a sh:NodeShape ;
+    sh:targetClass edso:SyntheticEnergyDataset ;
+    sh:property [ sh:path prov:wasGeneratedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path prov:wasDerivedFrom ; sh:nodeKind sh:IRI ] .
+
+edso:EvaluationRunShape a sh:NodeShape ;
+    sh:targetClass edso:EvaluationRun ;
+    sh:property [ sh:path edso:evaluatedRelease ; sh:minCount 1 ; sh:maxCount 1 ; sh:class edso:FoundationModelRelease ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:protocol ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Plan ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:scenario ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Entity ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:holdout ; sh:minCount 1 ; sh:maxCount 1 ; sh:class dcat:Dataset ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:baseline ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Entity ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:atSite ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Location ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path prov:wasAssociatedWith ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Agent ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path edso:setting ; sh:minCount 1 ; sh:maxCount 1 ; sh:in ( edso:Gym edso:TEF edso:Pilot ) ] .
+
+edso:EvaluationScoreShape a sh:NodeShape ;
+    sh:targetClass edso:EvaluationScore ;
+    sh:property [ sh:path prov:wasGeneratedBy ; sh:minCount 1 ; sh:maxCount 1 ; sh:class edso:EvaluationRun ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path dct:type ; sh:minCount 1 ; sh:maxCount 1 ; sh:class dqv:Metric ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path rdf:value ; sh:minCount 1 ; sh:maxCount 1 ; sh:datatype xsd:decimal ] ;
+    sh:property [ sh:path attr:unitMeasure ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] .
+
+edso:EvidenceBundleShape a sh:NodeShape ;
+    sh:targetClass edso:EvidenceBundle ;
+    sh:property [ sh:path edso:evidenceFor ; sh:minCount 1 ; sh:maxCount 1 ; sh:class edso:FoundationModelRelease ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path dct:subject ; sh:minCount 1 ; sh:maxCount 1 ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path prov:wasAttributedTo ; sh:minCount 1 ; sh:maxCount 1 ; sh:class prov:Agent ; sh:nodeKind sh:IRI ] ;
+    sh:property [ sh:path prov:hadMember ; sh:minCount 1 ; sh:nodeKind sh:IRI ] ;
+    sh:sparql [ sh:message "A score cited by a release-specific bundle must evaluate that release."@en ;
+        sh:select """PREFIX edso: <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+SELECT $this WHERE {
+  $this edso:evidenceFor ?model ; prov:hadMember ?score .
+  ?score a edso:EvaluationScore .
+  FILTER NOT EXISTS { ?score prov:wasGeneratedBy/edso:evaluatedRelease ?model }
+}""" ] .

@@ -1,0 +1,14 @@
+PREFIX edso: <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX dct: <http://purl.org/dc/terms/>
+PREFIX attr: <http://purl.org/linked-data/sdmx/2009/attribute#>
+PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
+
+SELECT ?release ?gymScore ?tefScore ?metric ?unit (?tv - ?gv AS ?difference) WHERE {
+  ?g edso:setting edso:Gym ; edso:evaluatedRelease ?release ; edso:protocol ?p ;
+     edso:holdout ?h ; edso:scenario ?s ; edso:baseline ?b .
+  ?t edso:setting edso:TEF ; edso:evaluatedRelease ?release ; edso:protocol ?p ;
+     edso:holdout ?h ; edso:scenario ?s ; edso:baseline ?b .
+  ?gymScore prov:wasGeneratedBy ?g ; dct:type ?metric ; attr:unitMeasure ?unit ; rdf:value ?gv .
+  ?tefScore prov:wasGeneratedBy ?t ; dct:type ?metric ; attr:unitMeasure ?unit ; rdf:value ?tv .
+}

@@ -1,0 +1,9 @@
+PREFIX dcat: <http://www.w3.org/ns/dcat#>
+PREFIX odrl: <http://www.w3.org/ns/odrl/2/>
+PREFIX dct: <http://purl.org/dc/terms/>
+
+SELECT ?service ?data ?profile ?policy WHERE {
+  ?catalog dcat:service ?service ; dcat:dataset ?data .
+  ?service dcat:servesDataset ?data .
+  ?data dct:conformsTo ?profile ; odrl:hasPolicy ?policy .
+}

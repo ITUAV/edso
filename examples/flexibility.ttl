@@ -1,0 +1,10 @@
+@prefix ex: <https://example.org/edso/> .
+@prefix dcat: <http://www.w3.org/ns/dcat#> .
+@prefix dct: <http://purl.org/dc/terms/> .
+@prefix s4ener: <https://saref.etsi.org/saref4ener/> .
+@prefix saref: <https://saref.etsi.org/core/> .
+
+ex:flexLog a dcat:Dataset ; dct:title "Fictional flexibility offers for coordinated charging"@en ;
+    dct:subject ex:offer ; dct:conformsTo <https://saref.etsi.org/saref4ener/v2.1.1/> .
+ex:offer a s4ener:FlexOffer ; s4ener:producedBy ex:charger .
+ex:charger a saref:Device .

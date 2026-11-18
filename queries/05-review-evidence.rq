@@ -1,0 +1,8 @@
+PREFIX edso: <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl#>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX dct: <http://purl.org/dc/terms/>
+
+SELECT ?bundle ?release ?deployment ?reviewer ?member WHERE {
+  ?bundle a edso:EvidenceBundle ; edso:evidenceFor ?release ; dct:subject ?deployment ;
+      prov:wasAttributedTo ?reviewer ; prov:hadMember ?member .
+} ORDER BY ?member
