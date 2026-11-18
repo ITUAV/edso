@@ -9,6 +9,6 @@ SELECT ?release ?gymScore ?tefScore ?metric ?unit (?tv - ?gv AS ?difference) WHE
      edso:holdout ?h ; edso:scenario ?s ; edso:baseline ?b .
   ?t edso:setting edso:TEF ; edso:evaluatedRelease ?release ; edso:protocol ?p ;
      edso:holdout ?h ; edso:scenario ?s ; edso:baseline ?b .
-  ?gymScore prov:wasGeneratedBy ?g ; dct:type ?metric ; attr:unitMeasure ?unit ; rdf:value ?gv .
-  ?tefScore prov:wasGeneratedBy ?t ; dct:type ?metric ; attr:unitMeasure ?unit ; rdf:value ?tv .
+  ?gymScore a edso:EvaluationScore ; prov:wasGeneratedBy ?g ; dct:type ?metric ; attr:unitMeasure ?unit ; rdf:value ?gv .
+  ?tefScore a edso:EvaluationScore ; prov:wasGeneratedBy ?t ; dct:type ?metric ; attr:unitMeasure ?unit ; rdf:value ?tv .
 }

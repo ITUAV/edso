@@ -1,0 +1,15 @@
+PREFIX edso: <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl#>
+PREFIX ex: <https://example.org/edso/>
+PREFIX prov: <http://www.w3.org/ns/prov#>
+PREFIX dct: <http://purl.org/dc/terms/>
+
+# Replace the policy version in VALUES with the one under review.
+SELECT DISTINCT ?policy ?data ?release ?run ?score WHERE {
+  VALUES ?policy { ex:policyA }
+  ?decision edso:policyVersion ?policy ; dct:subject ?data .
+  ?job edso:decisionRecord ?decision ; edso:inputSnapshot ?data .
+  ?round edso:update/prov:wasGeneratedBy ?job .
+  ?release a edso:FoundationModelRelease ; prov:wasDerivedFrom+/prov:wasGeneratedBy ?round .
+  OPTIONAL { ?run edso:evaluatedRelease ?release .
+             OPTIONAL { ?score a edso:EvaluationScore ; prov:wasGeneratedBy ?run } }
+} ORDER BY ?release ?run ?score

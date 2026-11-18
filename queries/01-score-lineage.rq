@@ -3,7 +3,7 @@ PREFIX prov: <http://www.w3.org/ns/prov#>
 PREFIX dct: <http://purl.org/dc/terms/>
 
 SELECT ?score ?release ?round ?site ?data ?decision ?policy WHERE {
-  ?score prov:wasGeneratedBy ?run .
+  ?score a edso:EvaluationScore ; prov:wasGeneratedBy ?run .
   ?run edso:setting edso:TEF ; edso:evaluatedRelease ?release .
   ?release prov:wasDerivedFrom+/prov:wasGeneratedBy ?round .
   ?round edso:update/prov:wasGeneratedBy ?job .

@@ -46,11 +46,15 @@ def verify():
     assert {r.member for r in rows(data, "05")} == {X.tefScore, X.modelCard}
     discovery, = rows(data, "06")
     assert tuple(discovery) == (X.serviceA, X.loadA, X.feederProfileV1, X.policyA)
-    print("Example conforms. Six competency queries returned their expected answers.")
+    assert {(r.release, r.score) for r in rows(data, "07")} == {
+        (X.forecastV1, X.gymScore), (X.forecastV1, X.tefScore),
+    }
+    print("Example conforms. Seven competency queries returned their expected answers.")
 
     # Each fault must be detected at its intended focus node.
     cases = [
         (X.jobA, X.allowA, E.decisionOutcome, E.Deny),
+        (X.jobA, X.loadA, URIRef("http://www.w3.org/ns/dcat#version"), None),
         (X.jobA, X.allowA, D.subject, X.loadB),
         (X.jobA, X.allowA, P.generatedAtTime, Literal("2026-01-11T09:00:00Z", datatype=XSD.dateTime)),
         (X.round1, X.account1, E.accountScope, X.jobA),
@@ -75,7 +79,7 @@ def verify():
     altered = Graph() + data
     altered.set((X.account1, E.epsilonLimit, Literal(Decimal("1.0"))))
     assert str(rows(altered, "03")[0].status) == "above stated ceiling"
-    print("Eight SHACL fault cases and two query counterexamples passed.")
+    print("Nine SHACL fault cases and two query counterexamples passed.")
 
 if __name__ == "__main__":
     verify()
