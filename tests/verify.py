@@ -43,13 +43,24 @@ def verify():
     assert account.population == X.cohortAB and str(account.status) == "within stated ceiling"
     synthetic, = rows(data, "04")
     assert synthetic.source == X.historicalHoldout and synthetic.metric == X.meanGap
-    assert {r.member for r in rows(data, "05")} == {X.tefScore, X.modelCard}
+    assert {r.member for r in rows(data, "05")} == {X.tefScore, X.modelCard, X.biasReview}
     discovery, = rows(data, "06")
     assert tuple(discovery) == (X.serviceA, X.loadA, X.feederProfileV1, X.policyA)
     assert {(r.release, r.score) for r in rows(data, "07")} == {
         (X.forecastV1, X.gymScore), (X.forecastV1, X.tefScore),
     }
     print("Example conforms. Seven competency queries returned their expected answers.")
+
+    # Exercise RDFLib's native Python-float export, including Turtle reparsing.
+    exported = Graph()
+    exported.add((X.account1, E.delta, Literal(1e-9)))
+    restored = Graph().parse(data=exported.serialize(format="turtle"), format="turtle")
+    value = restored.value(X.account1, E.delta)
+    assert value.datatype == XSD.double and float(value) == 1e-9
+    altered = Graph() + data
+    altered.set((X.account1, E.delta, value))
+    valid, _, report = check(altered)
+    assert valid, report
 
     # Each fault must be detected at its intended focus node.
     cases = [
@@ -63,6 +74,8 @@ def verify():
         (X.tef, X.tef, E.holdout, None),
         (X.review, X.review, E.evidenceFor, X.anotherRelease),
     ]
+    for value in (1.0, -1e-9, float("nan"), float("inf"), float("-inf"), "1e-9"):
+        cases.append((X.account1, X.account1, E.delta, Literal(value)))
     for focus, subject, predicate, replacement in cases:
         altered = Graph() + data
         altered.remove((subject, predicate, None))
@@ -79,7 +92,7 @@ def verify():
     altered = Graph() + data
     altered.set((X.account1, E.epsilonLimit, Literal(Decimal("1.0"))))
     assert str(rows(altered, "03")[0].status) == "above stated ceiling"
-    print("Nine SHACL fault cases and two query counterexamples passed.")
+    print(f"{len(cases)} SHACL fault cases, two query counterexamples and the float export passed.")
 
 if __name__ == "__main__":
     verify()

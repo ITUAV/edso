@@ -7,10 +7,15 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+@prefix schema: <https://schema.org/> .
+@prefix dqv: <http://www.w3.org/ns/dqv#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix attr: <http://purl.org/linked-data/sdmx/2009/attribute#> .
 @prefix ml: <http://data.europa.eu/it6/> .
 
 <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> a owl:Ontology ;
     dct:title "Energy Data Space Ontology"@en ;
+    rdfs:seeAlso <https://raw.githubusercontent.com/ITUAV/edso/main/shapes/evidence.ttl> ;
     owl:versionInfo "0.1.0-draft" ;
     dct:license <https://spdx.org/licenses/MIT.html> ;
     rdfs:comment "Application vocabulary for tracing governed local energy-data use through federated learning to evaluation evidence."@en .
@@ -34,6 +39,8 @@ edso:FoundationModelRelease a owl:Class ;
     rdfs:subClassOf ml:MachineLearningModel, prov:Entity .
 
 edso:UseDecision a owl:Class ;
+    rdfs:seeAlso prov:wasAttributedTo ;
+    skos:scopeNote "In this profile prov:wasAttributedTo identifies the authority responsible for the decision. Use edso:requestedBy for the agent requesting permission."@en ;
     rdfs:label "Use decision record"@en ;
     rdfs:comment "A dated decision about a requested operation on one dataset under an identified policy version. It can record refusal."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
@@ -46,6 +53,8 @@ edso:PrivacyAccount a owl:Class ;
     rdfs:subClassOf prov:Entity .
 
 edso:SyntheticEnergyDataset a owl:Class ;
+    rdfs:seeAlso prov:wasGeneratedBy, prov:wasDerivedFrom, dqv:hasQualityMeasurement, dqv:computedOn, dqv:isMeasurementOf, dqv:value, attr:unitMeasure ;
+    skos:scopeNote "Use prov:wasGeneratedBy for synthesis and prov:wasDerivedFrom for known sources. Link each optional measurement using dqv:hasQualityMeasurement. On the measurement use dqv:computedOn for the dataset, dqv:isMeasurementOf for the metric, dqv:value for its value and attr:unitMeasure for its unit when applicable."@en ;
     rdfs:label "Synthetic energy dataset"@en ;
     rdfs:comment "An energy dataset produced by a synthetic generation process. Quality and privacy evidence may be linked independently."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
@@ -58,18 +67,23 @@ edso:EvaluationRun a owl:Class ;
     rdfs:subClassOf prov:Activity .
 
 edso:EvaluationScore a owl:Class ;
+    rdfs:seeAlso prov:wasGeneratedBy, dct:type, rdf:value, attr:unitMeasure ;
+    skos:scopeNote "Use prov:wasGeneratedBy for the run, dct:type for the metric IRI, rdf:value for the decimal result and attr:unitMeasure for the unit IRI."@en ;
     rdfs:label "Evaluation score"@en ;
     rdfs:comment "A numeric observation about model performance for one evaluation run, with a metric and unit."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:subClassOf prov:Entity .
 
 edso:EvidenceBundle a owl:Class ;
+    rdfs:seeAlso dct:type, prov:hadMember, dct:subject ;
+    skos:scopeNote "Classify review documents with dct:type and link them with prov:hadMember. Use dct:subject for deployment context."@en ;
     rdfs:label "Evidence bundle"@en ;
     rdfs:comment "A collection of references assembled for a stated deployment context and review question."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:subClassOf prov:Collection .
 
 edso:inputSnapshot a owl:ObjectProperty ;
+    schema:domainIncludes edso:LocalContribution ;
     rdfs:label "input snapshot"@en ;
     rdfs:comment "Dataset version used in one local training activity."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
@@ -77,36 +91,42 @@ edso:inputSnapshot a owl:ObjectProperty ;
     rdfs:subPropertyOf prov:used .
 
 edso:decisionRecord a owl:ObjectProperty ;
+    schema:domainIncludes edso:LocalContribution ;
     rdfs:label "decision record"@en ;
     rdfs:comment "Decision cited by a local contribution for its declared data input and operation."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range edso:UseDecision .
 
 edso:policyVersion a owl:ObjectProperty ;
+    schema:domainIncludes edso:UseDecision ;
     rdfs:label "policy version"@en ;
     rdfs:comment "Identified version of the policy evaluated by the decision maker."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range odrl:Policy .
 
 edso:decisionOutcome a owl:ObjectProperty ;
+    schema:domainIncludes edso:UseDecision ;
     rdfs:label "decision outcome"@en ;
     rdfs:comment "Recorded outcome from the EDSO decision vocabulary."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range skos:Concept .
 
 edso:requestedAction a owl:ObjectProperty ;
+    schema:domainIncludes edso:UseDecision ;
     rdfs:label "requested action"@en ;
     rdfs:comment "Operation to which a decision applies. Use the same action IRI in the referenced ODRL rule."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range odrl:Action .
 
 edso:requestedBy a owl:ObjectProperty ;
+    schema:domainIncludes edso:UseDecision ;
     rdfs:label "requested by"@en ;
     rdfs:comment "Agent requesting the operation. It can differ from the authority recording the decision."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range prov:Agent .
 
 edso:atSite a owl:ObjectProperty ;
+    schema:domainIncludes edso:LocalContribution, edso:EvaluationRun ;
     rdfs:label "at site"@en ;
     rdfs:comment "Identifies the execution location or facility. Associate the responsible agent separately."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
@@ -114,18 +134,21 @@ edso:atSite a owl:ObjectProperty ;
     rdfs:subPropertyOf prov:atLocation .
 
 edso:privacyAccount a owl:ObjectProperty ;
+    schema:domainIncludes edso:FederatedTrainingRound ;
     rdfs:label "privacy account"@en ;
     rdfs:comment "Links work to a scoped privacy accounting statement."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range edso:PrivacyAccount .
 
 edso:accountScope a owl:ObjectProperty ;
+    schema:domainIncludes edso:PrivacyAccount ;
     rdfs:label "accounting scope"@en ;
     rdfs:comment "Activity or sequence covered by the reported bound."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range prov:Activity .
 
 edso:evaluatedRelease a owl:ObjectProperty ;
+    schema:domainIncludes edso:EvaluationRun ;
     rdfs:label "evaluated release"@en ;
     rdfs:comment "Model release used by a particular evaluation run."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
@@ -133,6 +156,7 @@ edso:evaluatedRelease a owl:ObjectProperty ;
     rdfs:subPropertyOf prov:used .
 
 edso:protocol a owl:ObjectProperty ;
+    schema:domainIncludes edso:EvaluationRun ;
     rdfs:label "evaluation protocol"@en ;
     rdfs:comment "Versioned executable specification fixing the task, horizon, metrics and scoring method."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
@@ -140,6 +164,7 @@ edso:protocol a owl:ObjectProperty ;
     rdfs:subPropertyOf prov:used .
 
 edso:holdout a owl:ObjectProperty ;
+    schema:domainIncludes edso:EvaluationRun ;
     rdfs:label "evaluation holdout"@en ;
     rdfs:comment "Identifiable dataset split used as evaluation input."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
@@ -147,24 +172,28 @@ edso:holdout a owl:ObjectProperty ;
     rdfs:subPropertyOf prov:used .
 
 edso:scenario a owl:ObjectProperty ;
+    schema:domainIncludes edso:EvaluationRun ;
     rdfs:label "scenario"@en ;
     rdfs:comment "Versioned description of workload and operating conditions in the evaluation."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range prov:Entity .
 
 edso:setting a owl:ObjectProperty ;
+    schema:domainIncludes edso:EvaluationRun ;
     rdfs:label "evaluation setting"@en ;
     rdfs:comment "Environment category such as an AI gym, a TEF or an operational pilot."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range skos:Concept .
 
 edso:baseline a owl:ObjectProperty ;
+    schema:domainIncludes edso:EvaluationRun ;
     rdfs:label "baseline"@en ;
     rdfs:comment "Versioned reference predictor used for comparison."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range prov:Entity .
 
 edso:update a owl:ObjectProperty ;
+    schema:domainIncludes edso:FederatedTrainingRound ;
     rdfs:label "local update"@en ;
     rdfs:comment "Update artifact used by a federated round, linked to its generating local activity."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
@@ -172,42 +201,49 @@ edso:update a owl:ObjectProperty ;
     rdfs:subPropertyOf prov:used .
 
 edso:evidenceFor a owl:ObjectProperty ;
+    schema:domainIncludes edso:EvidenceBundle ;
     rdfs:label "evidence for"@en ;
     rdfs:comment "Release to which an evidence package refers."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range edso:FoundationModelRelease .
 
 edso:epsilon a owl:DatatypeProperty ;
+    schema:domainIncludes edso:PrivacyAccount ;
     rdfs:label "reported epsilon"@en ;
     rdfs:comment "Epsilon of the reported DP guarantee for the declared delta and scope."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range xsd:decimal .
 
 edso:delta a owl:DatatypeProperty ;
+    schema:domainIncludes edso:PrivacyAccount ;
     rdfs:label "reported delta"@en ;
-    rdfs:comment "Delta of the reported DP guarantee for the same scope as epsilon."@en ;
+    rdfs:comment "Delta of the reported DP guarantee for the same scope as epsilon. The evidence profile accepts decimal and double literals in [0, 1)."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
-    rdfs:range xsd:decimal .
+    rdfs:range [ a rdfs:Datatype ; owl:unionOf ( xsd:decimal xsd:double ) ] .
 
 edso:epsilonLimit a owl:DatatypeProperty ;
+    schema:domainIncludes edso:PrivacyAccount ;
     rdfs:label "epsilon ceiling"@en ;
     rdfs:comment "Optional governance ceiling stated for the same delta, adjacency, population and scope."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range xsd:decimal .
 
 edso:protectedUnit a owl:DatatypeProperty ;
+    schema:domainIncludes edso:PrivacyAccount ;
     rdfs:label "protected unit"@en ;
     rdfs:comment "Unit of protection, for example one household across the full period."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range xsd:string .
 
 edso:adjacency a owl:DatatypeProperty ;
+    schema:domainIncludes edso:PrivacyAccount ;
     rdfs:label "adjacency relation"@en ;
     rdfs:comment "Rule specifying which pairs of input datasets are neighbours."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     rdfs:range xsd:string .
 
 edso:accountant a owl:DatatypeProperty ;
+    schema:domainIncludes edso:PrivacyAccount ;
     rdfs:label "accounting method"@en ;
     rdfs:comment "Method and version used to report the bound."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
@@ -231,3 +267,39 @@ edso:localTraining a odrl:Action ;
     rdfs:comment "Execute a model training job within the data holder\u2019s declared site."@en ;
     rdfs:isDefinedBy <https://raw.githubusercontent.com/ITUAV/edso/main/ontology/edso.ttl> ;
     odrl:includedIn odrl:use .
+
+
+# Entity declarations for standalone OWL processing. External axioms remain
+# available in their respective vocabularies. domainIncludes is a usage annotation.
+schema:domainIncludes a owl:AnnotationProperty .
+skos:scopeNote a owl:AnnotationProperty .
+skos:prefLabel a owl:AnnotationProperty .
+dct:title a owl:AnnotationProperty .
+dct:license a owl:AnnotationProperty .
+ml:MachineLearningModel a owl:Class .
+prov:Activity a owl:Class .
+prov:Agent a owl:Class .
+prov:Collection a owl:Class .
+prov:Entity a owl:Class .
+prov:Location a owl:Class .
+prov:Plan a owl:Class .
+dcat:Dataset a owl:Class .
+odrl:Policy a owl:Class .
+odrl:Action a owl:Class .
+skos:Concept a owl:Class .
+skos:ConceptScheme a owl:Class .
+prov:used a owl:ObjectProperty .
+prov:atLocation a owl:ObjectProperty .
+skos:inScheme a owl:ObjectProperty .
+odrl:includedIn a owl:ObjectProperty .
+odrl:use a odrl:Action .
+
+edso:ImpactAssessmentDPIA a skos:Concept ; skos:prefLabel "Data protection impact assessment"@en ; skos:inScheme edso:EvidenceTypes .
+
+edso:BiasAuditReport a skos:Concept ; skos:prefLabel "Bias audit report"@en ; skos:inScheme edso:EvidenceTypes .
+
+edso:ExplainabilityReport a skos:Concept ; skos:prefLabel "Explainability report"@en ; skos:inScheme edso:EvidenceTypes .
+
+edso:AIActTechnicalDossier a skos:Concept ; skos:prefLabel "AI Act technical dossier"@en ; skos:inScheme edso:EvidenceTypes .
+
+edso:EvidenceTypes a skos:ConceptScheme ; skos:prefLabel "Review document types"@en .

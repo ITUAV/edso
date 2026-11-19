@@ -94,3 +94,16 @@ ex:review a edso:EvidenceBundle ; edso:evidenceFor ex:forecastV1 ;
     dct:subject ex:advisoryUse ; dct:description "Review supporting material for advisory feeder forecasting."@en ;
     prov:wasAttributedTo ex:lab ; prov:hadMember ex:tefScore, ex:modelCard .
 ex:modelCard a prov:Entity .
+
+# Illustrative admission under a standing agreement. A separate decision
+# authorises each training use in the trace above.
+ex:standingAgreementV1 a prov:Entity ;
+    dct:title "Operator membership agreement, version 1"@en .
+ex:admitOperatorA a prov:Activity ; prov:used ex:standingAgreementV1 ;
+    prov:wasAssociatedWith ex:membershipBoard .
+ex:membershipBoard a prov:Organization .
+ex:membershipA a prov:Entity ; prov:wasGeneratedBy ex:admitOperatorA ;
+    dct:subject ex:operatorA ; dct:references ex:standingAgreementV1 .
+ex:policyA dct:references ex:standingAgreementV1 .
+ex:review dct:type edso:AIActTechnicalDossier ; prov:hadMember ex:biasReview .
+ex:biasReview a prov:Entity ; dct:type edso:BiasAuditReport .
