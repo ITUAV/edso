@@ -1,0 +1,98 @@
+{
+  "snapshot": "0917407b3d343775fd955ba25ae1974d9073cdd7",
+  "counts": {
+    "ontology_triples": 283,
+    "fixture_triples": 190,
+    "classes": 9
+  },
+  "comparison": {
+    "baseline_pairs": 1,
+    "mutations": [
+      {
+        "changed": "release",
+        "matched_pairs": 0
+      },
+      {
+        "changed": "protocol",
+        "matched_pairs": 0
+      },
+      {
+        "changed": "holdout",
+        "matched_pairs": 0
+      },
+      {
+        "changed": "scenario",
+        "matched_pairs": 0
+      },
+      {
+        "changed": "baseline",
+        "matched_pairs": 0
+      },
+      {
+        "changed": "metric",
+        "matched_pairs": 0
+      },
+      {
+        "changed": "unit",
+        "matched_pairs": 0
+      }
+    ]
+  },
+  "ablations": [
+    {
+      "removed": "decision link",
+      "shacl_conforms": false,
+      "lineage_rows": 1,
+      "policy_impact_rows": 0,
+      "candidate": false
+    },
+    {
+      "removed": "update provenance",
+      "shacl_conforms": false,
+      "lineage_rows": 1,
+      "policy_impact_rows": 0,
+      "candidate": false
+    },
+    {
+      "removed": "checkpoint provenance",
+      "shacl_conforms": true,
+      "lineage_rows": 0,
+      "policy_impact_rows": 0,
+      "candidate": false
+    },
+    {
+      "removed": "release derivation",
+      "shacl_conforms": false,
+      "lineage_rows": 0,
+      "policy_impact_rows": 0,
+      "candidate": false
+    }
+  ],
+  "candidate_gate": [
+    {
+      "case": "complete",
+      "shacl_conforms": true,
+      "candidate": true
+    },
+    {
+      "case": "different scenario",
+      "shacl_conforms": true,
+      "candidate": false
+    },
+    {
+      "case": "denied contribution",
+      "shacl_conforms": false,
+      "candidate": false
+    },
+    {
+      "case": "missing score unit",
+      "shacl_conforms": false,
+      "candidate": false
+    },
+    {
+      "case": "missing checkpoint provenance",
+      "shacl_conforms": true,
+      "candidate": false
+    }
+  ]
+}

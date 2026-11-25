@@ -8,6 +8,8 @@
 
 | Artifact | Purpose |
 |---|---|
+| [IEEE paper draft](paper/) | Standalone manuscript, PDF, and evidence-path figure |
+| [Evidence-gate experiments](experiments/evidence-gate/) | Reproducible context mutations, provenance ablations, and candidate-selection checks |
 | [OWL vocabulary in Turtle](ontology/edso.ttl) | Definitions for local contributions, use decisions, privacy accounts, model releases, evaluation runs and evidence bundles |
 | [SHACL evidence profile](shapes/evidence.ttl) | Required fields, types, numeric bounds and cross-record integrity rules for this working draft |
 | [Forecasting graph](examples/forecast.ttl) and [flexibility fragment](examples/flexibility.ttl) | End-to-end example and a separate illustration of direct SAREF reuse for EV flexibility |
